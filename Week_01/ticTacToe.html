@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TicTacToe小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .box {
+            margin: 200px auto 0;
+            width: 500px;
+            height: 500px;
+            text-align: center;
+            background: gray;
+        }
+        .box .cell {
+            display: inline-block;
+            width: 33%;
+            height: 33%;
+            border: 1px solid #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box"></div>
+    <script lang="js">
+        // 3 * 3 
+        // 构建棋盘
+        const box = document.querySelector('.box');
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        for (let index = 0; index < 9; index++) {
+            box.appendChild(cell)
+            
+        }
+        // box.appendChild(cell)
+
+        // 落子
+        // 胜利条件
+
+    </script>
+</body>
+
+</html>
