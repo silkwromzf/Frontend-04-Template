@@ -12,6 +12,7 @@
             user-select: none;
             box-sizing: border-box;
         }
+
         .box {
             margin: 200px auto 0;
             width: 600px;
@@ -19,6 +20,7 @@
             text-align: center;
             background: gray;
         }
+
         .box .cell {
             display: inline-block;
             width: 200px;
@@ -38,11 +40,29 @@
     <script lang="js">
         // 3 * 3 
         // 构建棋盘
+        // 二维数组  变成一维  多维在vue响应式的时候会有不便
         const data = [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
         ];
+        // 二维数组  变成一维  多维在vue响应式的时候会有不便
+        function getPoint(dot) {
+            const length = 3; // 一行3格
+            if (Array.isArray(dot)) {
+                if (dot[0] >= length
+                    || dot[0] < 0
+                    || dot[1] >= length
+                    || dot[1] < 0)
+                    throw Error('超限');
+                return dot[1] * length + dot[0]
+            } else {
+                return [dot % length, Math.floor(dot / length)]
+            }
+        }
+
+
+
         let state = 1; // 当前落子的人
         const translateText = val => val === 1 ? '×' : val === 2 ? 'o' : '';
         const limit = 3;
@@ -50,40 +70,38 @@
         renderBox(data);
 
         function renderBox(data) {
-            for (let y = 0; y < data.length; y++) {
-                for (let x = 0; x < data[y].length; x++) {
-                    createCell(data[y][x], x , y)
-                }
+            for (let i = 0; i < data.length; i++) {
+                createCell(data[i], i)
             }
         }
-        function createCell(val, x , y) {
+        function createCell(val, index) {
             const box = document.querySelector('.box');
             const cell = document.createElement('div');
             cell.classList.add('cell');
-            cell.addEventListener('click', () => onClick(x, y, cell))
+            cell.addEventListener('click', () => onClick(index, cell))
             cell.innerText = translateText(val);
             box.appendChild(cell);
         }
         // 落子
-        function onClick(x, y, cell) {
-            if(cell.innerText === '×' || cell.innerText === 'o') {
+        function onClick(index, cell) {
+            if (cell.innerText === '×' || cell.innerText === 'o') {
                 return
             }
-            const _text = translateText(state)
-            data[y][x] = state;
+            data[index] = state;
+            const _text = translateText(state);
             cell.innerText = _text;
-            if(check(x, y, data)) {
-                alert(_text + 'win')
+            if (check(index)) {
+                alert(_text + ' is win')
             }
             state = 3 - state;
         }
 
         // 胜利条件
-        function check(x, y, data) {
+        function check(index) {
             // 胜利条件
             // 在  横  纵  斜 四个方向上相同落子的数目相同
             // 在每次落子的时候  我们知道上一步是肯定没有获胜
-            // 所以我们以落子向周围发散  即检查落子米字格上面是否获胜
+            // 所以我们以落子向周围发散  即检查落子米字格上面是否获胜0
             // 如何检查是否获胜 即当前点向两边发散  两边总数达到limit 即获胜
             // | ——  \  /
             const direction = [
@@ -92,40 +110,39 @@
                 [1, 1],
                 [1, -1]
             ];
-            for (let index = 0; index < direction.length; index++) {
-                const d = direction[index];
-                let length = tentacle(d, [x, y], data);
-                if(length >= limit) {
+            for (let i = 0; i < direction.length; i++) {
+                const d = direction[i];
+                let length = tentacle(d, index);
+                if (length >= limit) {
                     return true
                 }
             }
             return false
         }
 
-        function tentacle(step, current, data) {
-            // 拷贝
-            current = [...current];
-            let forward = step,
+        function tentacle(step, currentIndex) {
+            const forward = [...step],
                 back = [-step[0], -step[1]];
-            return walk(forward, current, data ) + walk(back, current, data ) + 1
+            return walk(forward, currentIndex) + walk(back, currentIndex) + 1
         }
-        function walk(step, current, data) {
+        function walk(step, currentIndex) {
             let wall = limit - 1;
             let same = true;
             let distance = 0;
-            let next =  [(current[0] + step[0]), (current[1] + step[1])];
+            let current = getPoint(currentIndex);
+            let next = [(current[0] + step[0]), (current[1] + step[1])];
             while (same
                 && next[1] <= wall
                 && next[1] >= 0
                 && next[0] <= wall
                 && next[0] >= 0) {
-                let currentDot = data[current[1]][current[0]];
-                let nextDot = data[next[1]][next[0]];
+                let currentDot = data[getPoint(current)];
+                let nextDot = data[getPoint(next)];
                 same = currentDot === nextDot;
-                if(same) {
+                if (same) {
                     distance++;
                     current = [...next];
-                    next =  [(current[0] + step[0]), (current[1] + step[1])];
+                    next = [(current[0] + step[0]), (current[1] + step[1])];
                 }
             }
             return distance
