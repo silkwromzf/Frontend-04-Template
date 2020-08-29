@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TicTacToe小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        .box {
+            margin: 100px auto 0;
+            width: 600px;
+            height: 600px;
+            text-align: center;
+            background: gray;
+        }
+
+        .box .cell {
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            font-size: 100px;
+            color: red;
+            line-height: 200px;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box"></div>
+    <script lang="js">
+         // 3 * 3 
+         const data = [],
+            width = 3,
+            limit = 3;
+
+        for (let index = 0; index < width * width; index++) {
+            data.push(0);
+        }
+
+        function getPoint(dot) {
+            const length = width;
+            if (Array.isArray(dot)) {
+                if (dot[0] >= length
+                    || dot[0] < 0
+                    || dot[1] >= length
+                    || dot[1] < 0)
+                    throw Error('超限');
+                return dot[1] * length + dot[0]
+            } else {
+                return [dot % length, Math.floor(dot / length)]
+            }
+        }
+
+        let state = 1;
+        const translateText = val => val === 1 ? '×' : val === 2 ? 'o' : '';
+
+        renderBox(data);
+
+        function renderBox(data) {
+            for (let i = 0; i < data.length; i++) {
+                createCell(data[i], i)
+            }
+        }
+
+        function createCell(val, index) {
+            const box = document.querySelector('.box');
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.addEventListener('click', () => onClick(index, cell))
+            cell.innerText = translateText(val);
+            box.appendChild(cell);
+        }
+
+        function onClick(index, cell) {
+            if (cell.innerText === '×' || cell.innerText === 'o') {
+                return
+            }
+            data[index] = state;
+            const _text = translateText(state);
+            cell.innerText = _text;
+            if (check(index)) {
+                alert(_text + ' is win')
+            }
+            state = 3 - state;
+        }
+
+        function check(index) {
+            const direction = [
+                [1, 0],
+                [0, 1],
+                [1, 1],
+                [1, -1]
+            ];
+            for (let i = 0; i < direction.length; i++) {
+                const d = direction[i];
+                let length = tentacle(d, index);
+                if (length >= limit) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        function tentacle(step, currentIndex) {
+            const forward = [...step],
+                back = [-step[0], -step[1]];
+            return walk(forward, currentIndex) + walk(back, currentIndex) + 1
+        }
+        function walk(step, currentIndex) {
+            let wall = width - 1;
+            let same = true;
+            let distance = 0;
+            let current = getPoint(currentIndex);
+            let next = [(current[0] + step[0]), (current[1] + step[1])];
+            while (same
+                && next[1] <= wall
+                && next[1] >= 0
+                && next[0] <= wall
+                && next[0] >= 0) {
+                let currentDot = data[getPoint(current)];
+                let nextDot = data[getPoint(next)];
+                same = currentDot === nextDot;
+                if (same) {
+                    distance++;
+                    current = [...next];
+                    next = [(current[0] + step[0]), (current[1] + step[1])];
+                }
+            }
+            return distance
+        }
+
+
+    </script>
+</body>
+
+</html>
