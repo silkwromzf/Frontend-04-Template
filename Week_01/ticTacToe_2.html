@@ -116,6 +116,7 @@
                 back = [-step[0], -step[1]];
             return walk(forward, currentIndex) + walk(back, currentIndex) + 1
         }
+        
         function walk(step, currentIndex) {
             let wall = width - 1;
             let same = true;
