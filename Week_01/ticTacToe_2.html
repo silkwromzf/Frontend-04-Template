@@ -39,13 +39,13 @@
     <div class="box"></div>
     <script lang="js">
          // 3 * 3 
-         const data = [],
-            width = 3,
+        const width = 3,
             limit = 3;
 
-        for (let index = 0; index < width * width; index++) {
-            data.push(0);
-        }
+        const data = new Array(width * width).fill(0);
+
+        let state = 1;
+        const translateText = val => val === 1 ? '×' : val === 2 ? 'o' : '';
 
         function getPoint(dot) {
             const length = width;
@@ -60,9 +60,6 @@
                 return [dot % length, Math.floor(dot / length)]
             }
         }
-
-        let state = 1;
-        const translateText = val => val === 1 ? '×' : val === 2 ? 'o' : '';
 
         renderBox(data);
 
@@ -140,7 +137,20 @@
             return distance
         }
 
-
+        /**
+        *   AI电脑对战
+        *   采用 极大极小算法  和  alpha-beta剪枝
+            极大极小算法    Minimax算法又名极小化极大算法，是一种找出失败的最大可能性中的最小值的算法
+            https://blog.csdn.net/witnessai1/article/details/78377544
+            假设A B 两个对手  A取最大值获胜 B取最小值获胜
+            A 的状态下 肯定选择最大 而 B 的状态下肯定选择最小
+            所以根据这个条件递归下去一直到叶子节点
+            递归遍历节点太多 一般设置递归的深度dep
+            还可以使用  alpha-beta剪枝
+            https://www.jiqizhixin.com/graph/technologies/56dbb21e-c3f9-4e06-b16a-2e28f25b26c8
+            https://zhuanlan.zhihu.com/p/65108398
+        **/
+      
     </script>
 </body>
 
