@@ -38,7 +38,7 @@
 <body>
     <div class="box"></div>
     <script lang="js">
-         // 3 * 3 
+        // 3 * 3 
         const width = 3,
             limit = 3;
 
@@ -85,22 +85,25 @@
             data[index] = state;
             const _text = translateText(state);
             cell.innerText = _text;
-            if (check(index)) {
+            if (check(index, data)) {
                 alert(_text + ' is win')
             }
             state = 3 - state;
+            willWin(data, state)
         }
 
-        function check(index) {
-            const direction = [
+        function check(currentIndex, pattern) {
+            const directions = [
                 [1, 0],
                 [0, 1],
                 [1, 1],
                 [1, -1]
             ];
-            for (let i = 0; i < direction.length; i++) {
-                const d = direction[i];
-                let length = tentacle(d, index);
+            for (let i = 0; i < directions.length; i++) {
+                const direction = directions[i];
+                const forward = [...direction],
+                    back = [-direction[0], -direction[1]];
+                let length = walk(forward, currentIndex, pattern) + walk(back, currentIndex, pattern) + 1
                 if (length >= limit) {
                     return true
                 }
@@ -108,13 +111,7 @@
             return false
         }
 
-        function tentacle(step, currentIndex) {
-            const forward = [...step],
-                back = [-step[0], -step[1]];
-            return walk(forward, currentIndex) + walk(back, currentIndex) + 1
-        }
-        
-        function walk(step, currentIndex) {
+        function walk(step, currentIndex, pattern) {
             let wall = width - 1;
             let same = true;
             let distance = 0;
@@ -125,8 +122,8 @@
                 && next[1] >= 0
                 && next[0] <= wall
                 && next[0] >= 0) {
-                let currentDot = data[getPoint(current)];
-                let nextDot = data[getPoint(next)];
+                let currentDot = pattern[getPoint(current)];
+                let nextDot = pattern[getPoint(next)];
                 same = currentDot === nextDot;
                 if (same) {
                     distance++;
@@ -150,7 +147,68 @@
             https://www.jiqizhixin.com/graph/technologies/56dbb21e-c3f9-4e06-b16a-2e28f25b26c8
             https://zhuanlan.zhihu.com/p/65108398
         **/
+        
+
+        function willWin(data, state) {
+            const pattern = clone(data);
+            for (let index = 0; index < data.length; index++) {
+                // 0  1  2
+                if(pattern[index]) continue;
+                pattern[index] = state;
+                if(check(index, pattern)) {
+                    console.log(getPoint(index))
+                    return getPoint(index)
+                };
+                pattern[index] = 0;            
+            }
+            return null
+        }
       
+        /**
+         * @description:  假设 我们做一个电脑人 他会选择当前最有利的点落子
+         *                我们是能够知道当前的棋盘状态的 使用递归取判断每个点落子产生的后果 所以我们需要对data进行拷贝
+         * @data {Array} 当前棋盘状态 
+         * @state {Number} 当前落子的人 
+         * @return {type} 
+         */        
+        function bestChoice(data, state) {
+            const pattern = clone(data);
+            // 选择一个最优点落子
+            const win = willWin(pattern, state);
+            if(win) {
+                return {
+                    
+                    resulte: win
+                }
+            }
+
+        }
+
+
+
+        function clone(target, map = new WeakMap()) {
+            // 如果是多维数组我们就要面临深拷贝的问题 一维数组则避免这个问题
+            // 这里参照别人整理  深拷贝的几种方法
+
+            // 1. 最简单的是使用json api 进行转化成字符串  但是这样的问题是 有些值的处理会不在预期之内
+            // return JSON.parse(JSON.stringify(target))
+            // 2. 递归遍历
+            // 如果一个对象的某个属性指向对象本身 就会出现循环调用 内存溢出的情况
+            // 为了避免这种情况我们可以 只取保存这个循环调用的指针
+            let obj;
+            if (typeof target !== 'object') return target;
+            if (target instanceof Date) return new Date(target);
+            if (target instanceof RegExp) return new RegExp(target);
+            obj = Array.isArray(target) ? [] : {};
+            if (map.has(target)) {
+                return map.get(target)
+            }
+            map.set(target, obj);
+            for (const key in target) {
+                obj[key] = clone(target[key], map);
+            }
+            return obj
+        }
     </script>
 </body>
 
