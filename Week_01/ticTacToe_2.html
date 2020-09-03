@@ -177,9 +177,15 @@
             const win = willWin(pattern, state);
             if(win) {
                 return {
-                    
-                    resulte: win
+                    point: win,
+                    result: +Infinity
                 }
+            }
+            for (let index = 0; index < pattern.length; index++) {
+                pattern[index] = state;
+                const newPattern = clone(pattern);
+                let r = bestChoice(newPattern, 3 - state);
+
             }
 
         }
